@@ -18,4 +18,8 @@ public class DiaryDao {
 		return sqlSession.selectList("diary.list");
 	}
 
+	public void add(Diary diary) {
+		sqlSession.insert("diary.add", diary);
+	}
+
 }
