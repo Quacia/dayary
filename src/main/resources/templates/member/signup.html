@@ -1,0 +1,159 @@
+<#import "/spring.ftl" as spring />
+<!DOCTYPE html>
+<html>
+<head>
+<#include "/include/header.html"/>
+<title>Signup</title>
+<link rel="stylesheet" href="/webjars/summernote/0.8.9/dist/summernote.css" />
+<style>
+.loader {
+	position:absolute;
+	top:50%;
+	left:50%;
+    border: 3px solid #f3f3f3; /* Light grey */
+    border-top: 3px solid #3498db; 
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+<#include "/include/nav.html"/>
+	<div class="container">
+		<form action="/member/signup" method="post" class="form form-horizontal">
+			<@spring.bind "member.id" />
+			<div class="form-group">
+				<label for="" class="control-label col-sm-2">ID</label>
+				<div class="col-sm-8">
+					<input type="text" name="${spring.status.expression}" id="${spring.status.expression}" 
+							class="form-control" value="${spring.status.value?default('')}"/>
+					<span class="error">${spring.status.errorMessages[0]?default('')}</span>
+				</div>
+				<div class="col-sm-2">
+					<button class="btn btn-default btn-block" type="button" onclick="dupcheck()">중복확인</button>
+				</div>
+			</div>
+			<@spring.bind "member.password" />
+			<div class="form-group">
+				<label for="" class="control-label col-sm-2">Password</label>
+				<div class="col-sm-5">
+					<input type="password" name="${spring.status.expression}"
+							class="form-control" value="${spring.status.value?default('')}"/>
+					<span class="error">${spring.status.errorMessages[0]?default('')}</span>
+				</div>
+				<@spring.bind "member.passwordConfirm" />
+				<div class="col-sm-5">
+					<input type="password" name="${spring.status.expression}" placeholder="패스워드 확인"
+							class="form-control" value="${spring.status.value?default('')}"/>
+					<span class="error">${spring.status.errorMessages[0]?default('')}</span>
+				</div>
+			</div>
+			<@spring.bind "member.name" />
+			<div class="form-group">
+				<label class="control-label col-sm-2">Name</label>
+				<div class="col-sm-10">
+					<input type="text" name="${spring.status.expression}"
+							class="form-control" value="${spring.status.value?default('')}"/>
+							<span class="error">${spring.status.errorMessage?default('')}</span>
+				</div>
+			</div>
+			<@spring.bind "member.email" />
+			<div class="form-group">
+				<label class="control-label col-sm-2">E-Mail</label>
+				<div class="col-sm-4">
+					<input type="text" name="${spring.status.expression}" id="${spring.status.expression}"
+							class="form-control" value="${spring.status.value?default('')}"/>
+							<span id="email-error" class="error">${spring.status.errorMessage?default('')}</span>
+				</div>
+				<div class="col-sm-1 text-center">
+					<div id="loader"></div>
+				</div>
+				<div class="col-sm-2">
+					<button class="btn btn-default btn-block" type="button" onclick="emailcertify(this)">인증메일 발송</button>
+				</div>
+				<@spring.bind "member.emailCode"/>
+				<div class="col-sm-3">
+					<input type="text" name="${spring.status.expression}" class="form-control" 
+							value="${spring.status.value?default('')}" placeholder="인증코드 입력"/>
+					<span class="error">${spring.status.errorMessage?default('')}</span>
+				</div>
+			</div>
+			<div class="form-group">
+				<@spring.bind "member.gender"/>
+				<label for="" class="control-label col-sm-2">Gender</label>
+				<div class="col-sm-10">
+					<label for="" class="radio-inline">
+						<input type="radio" name="${spring.status.expression}" value="m"/>Male
+					</label>
+					<label for="" class="radio-inline">
+						<input type="radio" name="${spring.status.expression}" value="f"/>Female
+					</label>
+					<span class="error">${spring.status.errorMessage?default('')}</span>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-10 col-sm-offset-2"><button type="submit" class="btn btn-default btn-block">SUBMIT</button></div>
+			</div>
+			
+		</form>
+	</div>
+<#include "/include/footer.html"/>
+<script>
+	
+	function dupcheck(){
+		$.ajax({
+			url:"/member/dupcheck",
+			type:"post",
+			data:{id:$("#id").val()},
+			success:function(data){
+				if(data == 'y'){
+					alert("존재하는 아이디입니다.");
+				}else{
+					alert("사용가능한 아이디입니다.");
+				}
+			}
+		});
+	}
+	//자바스크립트로는 인증메일 발송이 안된다.
+	//따라서 ajax로 서버에 발송요청을 해야 한다.
+	//이메일 입력안함
+	function emailcertify(btn){
+		//버튼 비활성화
+		$(btn).attr("disabled", "disabled");
+		//<button disabled="disabled">와 같다. 속성 추가.
+		//로딩바 시작
+		$("#loader").addClass('loader');
+		$.ajax({
+			"url":"/member/emailcertify",
+			"type":"post",
+			"data":{email:$("#email").val()},
+			"success":function(data){
+				//버튼 활성화
+				$(btn).removeAttr("disabled");
+				//로딩바 종료
+				$("#loader").removeClass('loader');
+				if(data=='null'){
+					$("#email-error").text("이메일을 입력해 주세요.");
+				}else if(data == 'incorrect'){
+					$("#email-error").text("이메일 형식이 올바르지 않습니다.");
+				}else if(data == 'duplicated'){
+					$("#email-error").text("이미 가입된 이메일 주소입니다.");
+				}else if(data == 'error'){
+					$("#email-error").text("서버 오류로 인해 이메일 발송이 실패했습니다.");
+				}else{
+					alert('인증 메일을 전송했습니다.\n코드를 입력해 주세요.');
+					$("#email-error").text("");
+				}
+			}
+		});
+	}
+</script>
+</body>
+</html>

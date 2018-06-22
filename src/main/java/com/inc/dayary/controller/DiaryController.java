@@ -39,4 +39,5 @@ public class DiaryController {
 		diaryService.add(diary);
 		return "redirect:/";
 	}
+	
 }
