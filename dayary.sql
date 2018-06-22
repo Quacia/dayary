@@ -10,6 +10,8 @@ create table diary(
     regdate date not null
 );
 
+alter table diary add constraint fk_diary_u_id foreign key(u_id) references member(id);
+
 create sequence seq_diary_id;
 
 insert into diary values(seq_diary_id.nextval, 'quacia', '첫 일기~', '오늘은 날씨가 좋다.', sysdate);
@@ -32,3 +34,5 @@ create table member(
     email varchar2(30) not null unique,
     gender char(1) check(gender in('m', 'f'))
 );
+
+select * from member;

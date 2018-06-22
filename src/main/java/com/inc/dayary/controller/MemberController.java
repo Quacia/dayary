@@ -2,6 +2,7 @@ package com.inc.dayary.controller;
 
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -104,6 +105,41 @@ public class MemberController {
 		
 		return "success";
 	}
+	
+	@GetMapping("/member/signin")
+	public String signin(Model model) {
+		model.addAttribute("member", new Member());
+		return "/member/signin";
+	}
+	
+
+	@PostMapping("/member/signin")
+	public String signin(@ModelAttribute Member member, BindingResult result, HttpServletRequest request) {
+		
+		Member savedMember = memberService.findOne(member.getId());
+		if(savedMember == null) {
+			result.addError(new FieldError("notExsitId", "id", "존재하지 않는 아이디 입니다."));
+		}else if(!savedMember.getPassword().equals(member.getPassword())) {
+			result.addError(new FieldError("passwordNotSame", "password", "비밀번호가 일치하지 않습니다."));
+		}
+		
+		if(result.hasErrors()) {
+			return "/member/signin";
+		}
+		request.getSession().invalidate();
+		request.getSession().setAttribute("member", member);
+		//request.getSession()으로 가져오면 세션 만료 후 새로 세션을 가져온다.
+		//파라미터로 HttpSession을 가져와서 만료시키면, 언뜻 같은 코드인 듯 보이지만 예외가 발생한다.
+		
+		return "redirect:/";
+	}
+	
+	@GetMapping("/member/signout")
+	public String signout(HttpSession session) {
+		session.invalidate();
+		return "redirect:/member/signin";
+	}
+	
 	private boolean emailValidator(String email) {
 		// 이메일 정규표현식 검사
 		return Pattern.compile("([0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3})")
