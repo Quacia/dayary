@@ -18,6 +18,31 @@
 					<span class="error">${spring.status.errorMessages[0]?default('')}</span>
 				</div>
 			</div>
+			<div class="form-group">
+				<label for="" class="control-label col-sm-2">Tagging</label>
+				<div class="col-sm-10">
+					<div class="row">
+						<div class="col-sm-2">
+							<input type="text" id="tag-name" class="form-control"/>
+						</div>
+						<div class="col-sm-2">
+							<select name="" id="tag-color" class="form-control">
+								<option value="">GRAY</option>
+								<option value="danger">RED</option>
+								<option value="primary">BLUE</option>
+								<option value="success">GREEN</option>
+								<option value="warning">YELLOW</option>
+							</select>
+						</div>
+						<div class="col-sm-1">
+							<button type="button" class="btn btn-default" onclick="addTag()">추가</button>
+						</div>
+						<div class="col-sm-7" id="tags">
+						</div>
+					</div>
+				</div>
+				
+			</div>
 			<@spring.bind "diary.content" />
 			<div class="form-group">
 				<label for="" class="control-label col-sm-2">Content</label>
@@ -33,7 +58,7 @@
 	</div>
 <#include "/include/footer.html"/>
 <script src="/webjars/summernote/0.8.9/dist/summernote.min.js"></script>
-<script src="/webjars/summernote/0.8.9/dist/lang/summernote-ko-kr.js"></script>
+<script src="/webjars/summernote/0.8.9/dist/lang/summernote-ko-KR.js"></script>
 <script>
 	$("#content").summernote({
 		lang:"Ko-KR",
@@ -42,6 +67,43 @@
 		minHeight:100,
 		maxHeight:200
 	});
+	
+	var idx = 0;
+	function addTag(){
+		//태그 이름과 태그 색을 불러온다.
+		//태그 이름이 비어있으면 '태그 이름을 입력하세요' 경고창.
+		var tagname = $("#tag-name").val();
+		var color = $("#tag-color").val();
+		if(tagname==""){
+			alert('태그 이름을 입력하세요.');
+			return;
+		}
+		
+		var tagcolor = "label-";
+		if(color == ""){
+			color = "default";
+		}
+		tagcolor += color;
+		
+		
+		//console.log(tagname);
+		//console.log(tagcolor);
+		
+		var span = $("<span class='label'></span>")
+		span.addClass(tagcolor);
+		span.text(tagname);
+		
+		//console.log(span);
+		
+		$("#tags").append(span);
+		$("#tags").append("&nbsp;");
+		
+		$("#tags").append("<input type='hidden' name='tags["+ idx +"].name' value='"+ tagname +"'/>");
+		$("#tags").append("<input type='hidden' name='tags[" + idx +"].color' value='"+ color +"'/>");
+		idx++;
+		
+		$("#tag-name").val('');
+	}
 </script>
 </body>
 </html>

@@ -36,3 +36,13 @@ create table member(
 );
 
 select * from member;
+
+--tag
+create table tag(
+    id number primary key,
+    d_id number references diary(id),
+    name varchar2(30) not null,
+    color varchar2(10) default 'default' not null
+);
+
+create sequence seq_tag_id;

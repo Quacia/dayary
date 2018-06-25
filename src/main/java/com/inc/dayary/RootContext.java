@@ -17,7 +17,7 @@ public class RootContext {
 		mailSender.setHost("smtp.gmail.com");//구글 제공 메일서버.
 		mailSender.setPort(587); //smtp서버는 587번 포트를 사용한다.
 		mailSender.setUsername("lycorise@gmail.com");
-		mailSender.setPassword("fukki7520");
+		mailSender.setPassword("11111111");
 		Properties props = new Properties();
 		props.setProperty("mail.transport.protocol", "smtp");
 		props.setProperty("mail.smtp.auth", "true");
